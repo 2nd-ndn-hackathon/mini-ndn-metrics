@@ -286,7 +286,11 @@ class StatisticsCollection:
             if host.name == StatisticsCollection.NODE_NAME:
                 continue
 
+            # Status server
             host.cmd('nfd-status-http-server &')
+
+            # ndnmap client
+            host.cmd('nfdstat_c -p /ndn/edu/{}/ndnmap/stats -d 1 &'.format(host.name))
 
     @staticmethod
     def runWebServer():
