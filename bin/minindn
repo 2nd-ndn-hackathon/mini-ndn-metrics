@@ -64,7 +64,7 @@ from mininet.log import setLogLevel, output, info
 from mininet.cli import CLI
 from mininet.link import TCLink
 from mininet.util import ipStr, ipParse
-
+from mininet.node import Node
 
 from ndn import ExperimentManager
 from ndn.ndn_host import NdnHost, CpuLimitedNdnHost
@@ -188,6 +188,31 @@ class NdnTopo(Topo):
 
         info('Parse of ' + conf_arq + ' done.\n')
 
+class StatisticsCollection:
+
+    NODE_NAME = 'stats'
+
+    @staticmethod
+    def setup(net):
+        # Add statistics collection node
+        net.addHost(StatisticsCollection.NODE_NAME, params = {})
+
+        # Connect root namespace to virtual network
+        root = Node('root', inNamespace=False)
+        net.addLink(root, StatisticsCollection.NODE_NAME)
+
+        # Create link from statistics collection node to all other nodes
+        StatisticsCollection.createLinks(net)
+
+    @staticmethod
+    def createLinks(net):
+        for host in net.hosts:
+            if host.name == StatisticsCollection.NODE_NAME:
+                continue
+
+            net.addLink(StatisticsCollection.NODE_NAME, host)
+
+
 def execute(template_file='minindn.conf', testbed=False, experimentName=None, nPings=None, ctime=None, hr=False, faces=3, isCliEnabled=True):
     "Create a network based on template_file"
 
@@ -222,6 +247,8 @@ def execute(template_file='minindn.conf', testbed=False, experimentName=None, nP
 
     info('Setup time: ' + str(delta.seconds) + '\n')
 
+    StatisticsCollection.setup(net)
+
     net.start()
 
     # Giving proper IPs to intf so neighbor nodes can communicate
@@ -246,7 +273,11 @@ def execute(template_file='minindn.conf', testbed=False, experimentName=None, nP
     for host in net.hosts:
         nodes += str(host.name) + ","
 
-        conf = next(x for x in hosts_conf if x.name == host.name)
+        try:
+            conf = next(x for x in hosts_conf if x.name == host.name)
+        except StopIteration:
+            continue
+
         host.nlsrParameters = conf.nlsrParameters
 
         if faces is not None:
