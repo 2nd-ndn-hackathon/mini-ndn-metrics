@@ -209,8 +209,22 @@ class StatisticsCollection:
         StatisticsCollection.createLinks(net)
 
         # Create HTML page
+        page = '''<html>
+        <body>
+        <h1>Mini-NDN</h1>
+        '''
+
+        for host in net.hosts:
+            if host.name == StatisticsCollection.NODE_NAME:
+                continue
+
+            page += '<a href="status/{}.html">Node "{}" nfd-status</a><br>'.format(host.name, host.name)
+
+        page += '''</body>
+        </html>'''
+
         with open('/tmp/stats/index.html', 'w') as out:
-            out.write('<html>\n<body><h1>Mini-NDN</h1></body></html>')
+            out.write(page)
 
     @staticmethod
     def createLinks(net):
