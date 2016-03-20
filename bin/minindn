@@ -221,6 +221,16 @@ class StatisticsCollection:
             net.addLink(StatisticsCollection.NODE_NAME, host)
 
     @staticmethod
+    def run(net):
+        StatisticsCollection.runWebServer()
+
+        for host in net.hosts:
+            if host.name == StatisticsCollection.NODE_NAME:
+                continue
+
+            host.cmd('nfd-status-http-server &')
+
+    @staticmethod
     def runWebServer():
         devnull = open(os.devnull, 'wb')
         StatisticsCollection.server = Popen(['python', '-m', 'SimpleHTTPServer'], stdout=devnull, stderr=devnull, cwd="/tmp/stats")
@@ -267,7 +277,7 @@ def execute(template_file='minindn.conf', testbed=False, experimentName=None, nP
 
     net.start()
 
-    StatisticsCollection.runWebServer()
+    StatisticsCollection.run(net)
 
     # Giving proper IPs to intf so neighbor nodes can communicate
     # This is one way of giving connectivity, another way could be
