@@ -76,6 +76,8 @@ import datetime
 from os.path import expanduser
 import sys
 
+from subprocess import Popen
+
 from ndn.nlsr import Nlsr, NlsrConfigGenerator
 from ndn.nfd import Nfd
 
@@ -191,11 +193,13 @@ class NdnTopo(Topo):
 class StatisticsCollection:
 
     NODE_NAME = 'stats'
+    node = None
+    server = None
 
     @staticmethod
     def setup(net):
         # Add statistics collection node
-        net.addHost(StatisticsCollection.NODE_NAME, params = {})
+        StatisticsCollection.node = net.addHost(StatisticsCollection.NODE_NAME, params = {})
 
         # Connect root namespace to virtual network
         root = Node('root', inNamespace=False)
@@ -203,6 +207,10 @@ class StatisticsCollection:
 
         # Create link from statistics collection node to all other nodes
         StatisticsCollection.createLinks(net)
+
+        # Create HTML page
+        with open('/tmp/stats/index.html', 'w') as out:
+            out.write('<html>\n<body><h1>Mini-NDN</h1></body></html>')
 
     @staticmethod
     def createLinks(net):
@@ -212,6 +220,14 @@ class StatisticsCollection:
 
             net.addLink(StatisticsCollection.NODE_NAME, host)
 
+    @staticmethod
+    def runWebServer():
+        devnull = open(os.devnull, 'wb')
+        StatisticsCollection.server = Popen(['python', '-m', 'SimpleHTTPServer'], stdout=devnull, stderr=devnull, cwd="/tmp/stats")
+
+    @staticmethod
+    def cleanUp():
+        StatisticsCollection.server.kill()
 
 def execute(template_file='minindn.conf', testbed=False, experimentName=None, nPings=None, ctime=None, hr=False, faces=3, isCliEnabled=True):
     "Create a network based on template_file"
@@ -250,6 +266,8 @@ def execute(template_file='minindn.conf', testbed=False, experimentName=None, nP
     StatisticsCollection.setup(net)
 
     net.start()
+
+    StatisticsCollection.runWebServer()
 
     # Giving proper IPs to intf so neighbor nodes can communicate
     # This is one way of giving connectivity, another way could be
@@ -325,6 +343,8 @@ def execute(template_file='minindn.conf', testbed=False, experimentName=None, nP
 
     if isCliEnabled is True:
         CLI(net)
+
+    StatisticsCollection.cleanUp()
 
     net.stop()
 
