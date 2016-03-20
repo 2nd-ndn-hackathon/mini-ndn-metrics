@@ -93,6 +93,11 @@ class NdnHost(Host, NdnHostCommon):
         if not NdnHost.inited:
             NdnHostCommon.init()
 
+        # Hacky quick fix
+        if self.params.get('workdir') is None:
+            self.params['workdir'] = '/tmp'
+            self.params['params'] = {}
+
         # Create home directory for a node
         self.homeFolder = "%s/%s" % (self.params['workdir'], self.name)
         self.cmd("mkdir -p %s" % self.homeFolder)
