@@ -75,6 +75,7 @@ import optparse
 import datetime
 from os.path import expanduser
 import sys
+from threading import Timer
 
 from subprocess import Popen
 
@@ -234,6 +235,32 @@ class NdnTopo(Topo):
 
         info('Parse of ' + conf_arq + ' done.\n')
 
+class NlsrStatusFetcher:
+
+    threads = []
+
+    @staticmethod
+    def startFetch(host):
+        t = Timer(5, NlsrStatusFetcher.fetchNlsrStatus, [host])
+        t.start()
+
+        NlsrStatusFetcher.threads.append(t)
+
+    @staticmethod
+    def fetchNlsrStatus(host):
+        host.cmd('nlsrc status > /tmp/stats/status/nlsr/{}.txt &'.format(host.name))
+        # Schedule next fetch
+        t = Timer(5, NlsrStatusFetcher.fetchNlsrStatus, [host])
+        t.start()
+
+        NlsrStatusFetcher.threads.append(t)
+
+    @staticmethod
+    def cleanUp():
+        for thread in NlsrStatusFetcher.threads:
+            thread.cancel()
+
+
 class StatisticsCollection:
 
     NODE_NAME = 'stats'
@@ -245,6 +272,7 @@ class StatisticsCollection:
         # Create directory for web server
         Popen(['mkdir', '-p', '/tmp/stats'])
         Popen(['cp', '-r', '/usr/local/etc/mini-ndn/status/', '/tmp/stats/'])
+        Popen(['mkdir', '-p', '/tmp/stats/status/nlsr/'])
 
         # Erase previous links file
         open('/tmp/stats/links.txt', 'w').close()
@@ -278,6 +306,7 @@ class StatisticsCollection:
         <tr>
           <th>Node Name</th>
           <th>NFD Status</th>
+          <th>NLSR Status</th>
         </tr>
         '''
 
@@ -288,6 +317,7 @@ class StatisticsCollection:
             page += '<tr>'
             page += '<td>{}</td>'.format(host.name)
             page += '<td><a href="status/{}.xml">Status</a></td>'.format(host.name)
+            page += '<td><a href="status/nlsr/{}.txt">Status</a></td>'.format(host.name)
             page += '</tr>'
 
         page += '''
@@ -334,6 +364,9 @@ class StatisticsCollection:
             # ndnmap client
             host.cmd('nfdstat_c -p /ndn/edu/{}/ndnmap/stats -d 1 &'.format(host.name))
 
+            # NLSR status collector
+            NlsrStatusFetcher.startFetch(host)
+
         time.sleep(0.25)
 
         # Fetch nfd-status from each node in the network
@@ -352,6 +385,7 @@ class StatisticsCollection:
     @staticmethod
     def cleanUp():
         StatisticsCollection.server.kill()
+        NlsrStatusFetcher.cleanUp()
 
 def execute(options):
     "Create a network based on template_file"
