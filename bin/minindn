@@ -411,6 +411,11 @@ class StatisticsCollection:
             StatisticsCollection.node.cmd('./status/nfd-status-fetcher.py -u {}:8080 -o /tmp/stats/status/{}.xml -t 5 &'.format(address, hostName))
 
     @staticmethod
+    def runNdnMapServer():
+        print 'nfdstat_s -f links.txt -n {} &'.format(NlsrConfigGenerator.totalLinks)
+        StatisticsCollection.node.cmd('nfdstat_s -f links.txt -n {} &> /dev/null &'.format(NlsrConfigGenerator.totalLinks))
+
+    @staticmethod
     def runWebServer():
         devnull = open(os.devnull, 'wb')
         StatisticsCollection.server = Popen(['python', '-m', 'SimpleHTTPServer'], stdout=devnull, stderr=devnull, cwd="/tmp/stats")
@@ -516,6 +521,8 @@ def execute(options):
         # Start NLSR
         host.nlsr = Nlsr(host)
         host.nlsr.start()
+
+    StatisticsCollection.runNdnMapServer()
 
     nodes = nodes[0:-1]
 
