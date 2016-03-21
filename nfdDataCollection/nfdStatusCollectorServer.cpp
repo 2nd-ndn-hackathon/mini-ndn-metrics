@@ -378,7 +378,8 @@ main(int argc, char* argv[])
   {
     ndn::NdnMapServer::linkPair linePair;
     std::string linkPrefix;
-    file >> linePair.linkId >> linkPrefix >> linePair.linkIp;
+    std::string endPrefix;
+    file >> linePair.linkId >> linkPrefix >> linePair.linkIp >> endPrefix;
     if(file.fail())
     {
       std::cout << "num_lines was incorrect too large" << std::endl;
