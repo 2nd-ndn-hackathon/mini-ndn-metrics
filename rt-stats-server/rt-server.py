@@ -31,6 +31,19 @@ class RtStats:
 def server_static():
     return static_file('rt.html', root='/tmp/stats/')
 
+@get('/stats/<node>.json')
+def getNodeJson(node):
+    statsDir = '/tmp/stats/status/rt/'
+
+    nodeName = str(node)
+    stats = RtStats(nodeName)
+
+    with open('{}{}.txt'.format(statsDir, nodeName), 'r') as inFile:
+        for line in inFile:
+            stats.processLine(line)
+
+    return json.dumps(stats.stats)
+
 @get('/stats.json')
 def serve_json():
     statsDir = '/tmp/stats/status/rt/'
