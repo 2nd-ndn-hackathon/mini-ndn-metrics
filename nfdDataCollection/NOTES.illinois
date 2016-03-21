@@ -1,0 +1,6 @@
+
+Need to tell it where the boost libs are:
+
+./waf configure --with-c++11 --boost-libs=/usr/lib/i386-linux-gnu/
+
+

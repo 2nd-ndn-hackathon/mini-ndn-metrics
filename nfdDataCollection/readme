@@ -1,0 +1,12 @@
+To build this directory:
+	./waf configure 
+	./waf
+
+-------------
+Examples:
+-------------
+To run the client:
+	build/nfdstat_c -p /ndn/edu/arizona/ndnmap/stats -d 1
+
+To run the server:
+	 build/nfdstat_s -f linksListExample -n 4 -d 1
