@@ -23,6 +23,8 @@
 
 from ndn.ndn_application import NdnApplication
 
+from subprocess import Popen
+
 class Nlsr(NdnApplication):
     def __init__(self, node):
         NdnApplication.__init__(self, node)
@@ -46,6 +48,7 @@ class NlsrConfigGenerator:
 
     ROUTING_LINK_STATE = "ls"
     ROUTING_HYPERBOLIC = "hr"
+    totalLinks = 0
 
     def __init__(self, node):
         node.cmd("sudo cp /usr/local/etc/mini-ndn/nlsr.conf nlsr.conf")
@@ -104,6 +107,8 @@ class NlsrConfigGenerator:
 
     def __getNeighborsSection(self):
 
+        ndnmapIps = []
+
         neighbors =  "neighbors\n"
         neighbors += "{\n"
 
@@ -128,7 +133,17 @@ class NlsrConfigGenerator:
                 neighbors += "  link-cost " + linkCost + "\n"
                 neighbors += "}\n"
 
+                ndnmapIps.append(ip)
+
         neighbors += "}\n"
+
+        links = ""
+        for address in ndnmapIps:
+            NlsrConfigGenerator.totalLinks += 1
+            links += "{} /ndn/edu/{} {}\n".format(NlsrConfigGenerator.totalLinks, self.node.name, address)
+
+        with open('/tmp/stats/links.txt', 'a') as out:
+                out.write(links)
 
         return neighbors
 

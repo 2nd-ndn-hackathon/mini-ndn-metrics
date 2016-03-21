@@ -246,6 +246,9 @@ class StatisticsCollection:
         Popen(['mkdir', '-p', '/tmp/stats'])
         Popen(['cp', '-r', '/usr/local/etc/mini-ndn/status/', '/tmp/stats/'])
 
+        # Erase previous links file
+        open('/tmp/stats/links.txt', 'w').close()
+
         # Add statistics collection node
         StatisticsCollection.node = net.addHost(StatisticsCollection.NODE_NAME)
 
