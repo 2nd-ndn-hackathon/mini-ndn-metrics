@@ -297,6 +297,7 @@ class StatisticsCollection:
     node = None
     server = None
     rt_server = None
+    global_stats = None
 
     @staticmethod
     def setup(net):
@@ -420,6 +421,9 @@ class StatisticsCollection:
         devnull = open('/tmp/server.log', 'wb')
         StatisticsCollection.rt_server = Popen(['/usr/local/etc/mini-ndn/rt-stats-server/rt-server.py',], stdout=devnull, stderr=devnull)
 
+        # Run Bandwidth server
+        StatisticsCollection.global_stats = Popen(['/usr/local/etc/mini-ndn/global_stats/globalStatServer.py',], cwd='/tmp/stats')
+
     @staticmethod
     def runNdnMapServer():
         StatisticsCollection.node.cmd('nfdstat_s -f links.txt -n {} &> /dev/null &'.format(NlsrConfigGenerator.totalLinks))
@@ -433,6 +437,7 @@ class StatisticsCollection:
     def cleanUp():
         StatisticsCollection.server.kill()
         StatisticsCollection.rt_server.kill()
+        StatisticsCollection.global_stats.kill()
         NlsrStatusFetcher.cleanUp()
         NfdRealtimeDataFetcher.cleanUp()
 

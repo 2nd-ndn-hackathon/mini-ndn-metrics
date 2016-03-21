@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import tornado.httpserver
 import tornado.websocket
 import tornado.ioloop
@@ -14,7 +16,7 @@ fileNameLinks = "links.txt"
 fileNameStat = "stat"
 
 class WSHandler(tornado.websocket.WebSocketHandler):
-	
+
 	#check_origin fixes an error 403 with Tornado
 	#http://stackoverflow.com/questions/24851207/tornado-403-get-warning-when-opening-websocket
 	def check_origin(self, origin):
@@ -22,7 +24,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 
 	def open(self):
 		self.sendNames()
-		
+
 	def sendNames(self):
 		with open(fileNameLinks) as f:
 			content = f.readlines()
@@ -33,16 +35,16 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 					linkId = links[0]
 					name = links[1] + " " + links[3]
 					msg += 'name:' + linkId + ':' + name.rstrip() + ';'
-			f.close()	
+			f.close()
 			print(msg)
 			self.write_message(msg)
-		
-		
+
+
 			#Send message periodic via socket upon a time interval
 			self.callback = PeriodicCallback(self.send_values, timeInterval)
 			self.callback.start()
-			
-			
+
+
 	def send_values(self):
 		with open(fileNameStat) as f:
 			content = f.readlines()
@@ -58,9 +60,9 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 							bytesOut = e[1]
 						elif e[0] == "RX" :
 							bytesIn = e[1]
-					
+
 					msg += 'id:' + linkId + ':' + bytesOut + ':' + bytesIn.rstrip() + ';'
-			f.close()	
+			f.close()
 			print(msg)
 			self.write_message(msg)
 
