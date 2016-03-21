@@ -286,8 +286,19 @@ class StatisticsCollection:
             if host.name == StatisticsCollection.NODE_NAME:
                 continue
 
+            interfaces = host.intfList()
+            address = None
+
+            for intf in interfaces:
+                if intf.link.intf1.node.name == StatisticsCollection.NODE_NAME:
+                    address = intf.link.intf2.ip
+                    print address
+                elif intf.link.intf2.node.name == StatisticsCollection.NODE_NAME:
+                    address = intf.link.intf1.ip
+                    print address
+
             # Status server
-            host.cmd('nfd-status-http-server &')
+            host.cmd('nfd-status-http-server -a {} &'.format(address))
 
             # ndnmap client
             host.cmd('nfdstat_c -p /ndn/edu/{}/ndnmap/stats -d 1 &'.format(host.name))
@@ -348,8 +359,6 @@ def execute(options):
 
     net.start()
 
-    StatisticsCollection.run(net)
-
     # Giving proper IPs to intf so neighbor nodes can communicate
     # This is one way of giving connectivity, another way could be
     # to insert a switch between each pair of neighbors
@@ -371,6 +380,8 @@ def execute(options):
                 ndnNetBase = ipStr(ipParse(ndnNetBase) + 4)
 
     nodes = ""    # Used later to check prefix name in checkFIB
+
+    StatisticsCollection.run(net)
 
     # NLSR initialization
     for host in net.hosts:
