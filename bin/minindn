@@ -260,6 +260,36 @@ class NlsrStatusFetcher:
         for thread in NlsrStatusFetcher.threads:
             thread.cancel()
 
+class NfdRealtimeDataFetcher:
+
+    threads = []
+
+    @staticmethod
+    def startFetch(host):
+        # Remove old file
+        outputFile = '/tmp/stats/status/{}-real-time.txt'.format(host.name)
+        Popen(['rm', ''.format(outputFile)])
+
+        t = Timer(5, NfdRealtimeDataFetcher.fetchData, [host])
+        t.start()
+
+        NfdRealtimeDataFetcher.threads.append(t)
+
+    @staticmethod
+    def fetchData(host):
+        outputFile = '/tmp/stats/status/{}-real-time.txt'.format(host.name)
+        host.cmd("nfd-status -v | tail -10 | cut -d'=' -f 2 | cut -d' ' -f 1' >> {}".format(outputFile))
+
+        # Schedule next fetch
+        t = Timer(5, NfdRealtimeDataFetcher.fetchData, [host])
+        t.start()
+
+        NfdRealtimeDataFetcher.threads.append(t)
+
+    @staticmethod
+    def cleanUp():
+        for thread in NfdRealtimeDataFetcher.threads:
+            thread.cancel()
 
 class StatisticsCollection:
 
@@ -367,6 +397,9 @@ class StatisticsCollection:
             # NLSR status collector
             NlsrStatusFetcher.startFetch(host)
 
+            # NFD realtime data collector
+            #NfdRealtimeDataFetcher.startFetch(host)
+
         time.sleep(0.25)
 
         # Fetch nfd-status from each node in the network
@@ -386,6 +419,7 @@ class StatisticsCollection:
     def cleanUp():
         StatisticsCollection.server.kill()
         NlsrStatusFetcher.cleanUp()
+        NfdRealtimeDataFetcher.cleanUp()
 
 def execute(options):
     "Create a network based on template_file"

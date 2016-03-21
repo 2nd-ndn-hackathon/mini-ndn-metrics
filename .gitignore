@@ -13,3 +13,6 @@ openflow
 examples
 util
 .DS_Store
+*.pyc
+*.lock-waf_linux2_build
+*.waf-1.8.0*
