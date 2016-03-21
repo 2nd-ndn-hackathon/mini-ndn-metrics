@@ -242,6 +242,10 @@ class StatisticsCollection:
 
     @staticmethod
     def setup(net):
+        # Create directory for web server
+        Popen(['mkdir', '/tmp/stats'])
+        Popen(['cp', '-r', '/usr/local/etc/mini-ndn/status/', '/tmp/stats/'])
+
         # Add statistics collection node
         StatisticsCollection.node = net.addHost(StatisticsCollection.NODE_NAME)
 
@@ -262,7 +266,7 @@ class StatisticsCollection:
             if host.name == StatisticsCollection.NODE_NAME:
                 continue
 
-            page += '<a href="status/{}.html">Node "{}" nfd-status</a><br>'.format(host.name, host.name)
+            page += '<a href="status/{}.xml">Node "{}" nfd-status</a><br>'.format(host.name, host.name)
 
         page += '''</body>
         </html>'''
@@ -282,6 +286,8 @@ class StatisticsCollection:
     def run(net):
         StatisticsCollection.runWebServer()
 
+        connectedIps = []
+
         for host in net.hosts:
             if host.name == StatisticsCollection.NODE_NAME:
                 continue
@@ -292,16 +298,22 @@ class StatisticsCollection:
             for intf in interfaces:
                 if intf.link.intf1.node.name == StatisticsCollection.NODE_NAME:
                     address = intf.link.intf2.ip
-                    print address
                 elif intf.link.intf2.node.name == StatisticsCollection.NODE_NAME:
                     address = intf.link.intf1.ip
-                    print address
+
+            connectedIps.append((address, host.name))
 
             # Status server
             host.cmd('nfd-status-http-server -a {} &'.format(address))
 
             # ndnmap client
             host.cmd('nfdstat_c -p /ndn/edu/{}/ndnmap/stats -d 1 &'.format(host.name))
+
+        time.sleep(1)
+
+        # Fetch nfd-status from each node in the network
+        for pair in connectedIps:
+            StatisticsCollection.node.cmd('./status/nfd-status-fetcher.py -u {}:8080 -o /tmp/stats/status/{}.xml -t 5 &'.format(pair[0], pair[1]))
 
     @staticmethod
     def runWebServer():
