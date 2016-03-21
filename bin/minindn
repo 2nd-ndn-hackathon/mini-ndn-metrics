@@ -333,7 +333,11 @@ class StatisticsCollection:
 
         # Fetch nfd-status from each node in the network
         for pair in connectedIps:
-            StatisticsCollection.node.cmd('./status/nfd-status-fetcher.py -u {}:8080 -o /tmp/stats/status/{}.xml -t 5 &'.format(pair[0], pair[1]))
+            address = pair[0]
+            hostName = pair[1]
+
+            StatisticsCollection.node.cmd('nfdc register /ndn/edu/{} udp://{} &'.format(hostName, address))
+            StatisticsCollection.node.cmd('./status/nfd-status-fetcher.py -u {}:8080 -o /tmp/stats/status/{}.xml -t 5 &'.format(address, hostName))
 
     @staticmethod
     def runWebServer():
