@@ -133,14 +133,17 @@ class NlsrConfigGenerator:
                 neighbors += "  link-cost " + linkCost + "\n"
                 neighbors += "}\n"
 
-                ndnmapIps.append(ip)
+                ndnmapIps.append((ip, '/ndn/edu/{}'.format(other.name)))
 
         neighbors += "}\n"
 
         links = ""
-        for address in ndnmapIps:
+        for pair in ndnmapIps:
+            address = pair[0]
+            prefix = pair[1]
+
             NlsrConfigGenerator.totalLinks += 1
-            links += "{} /ndn/edu/{} {}\n".format(NlsrConfigGenerator.totalLinks, self.node.name, address)
+            links += "{} /ndn/edu/{} {} {}\n".format(NlsrConfigGenerator.totalLinks, self.node.name, address, prefix)
 
         with open('/tmp/stats/links.txt', 'a') as out:
                 out.write(links)
