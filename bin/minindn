@@ -243,7 +243,7 @@ class StatisticsCollection:
     @staticmethod
     def setup(net):
         # Create directory for web server
-        Popen(['mkdir', '/tmp/stats'])
+        Popen(['mkdir', '-p', '/tmp/stats'])
         Popen(['cp', '-r', '/usr/local/etc/mini-ndn/status/', '/tmp/stats/'])
 
         # Add statistics collection node
@@ -258,17 +258,34 @@ class StatisticsCollection:
 
         # Create HTML page
         page = '''<html>
+        <head>
+        <title>Mini-NDN</title>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+        <!-- Latest compiled and minified JavaScript -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+        </head>
         <body>
+        <div class="container">
         <h1>Mini-NDN</h1>
+        <ul class="list-group">
         '''
 
         for host in net.hosts:
             if host.name == StatisticsCollection.NODE_NAME:
                 continue
 
+            page += '<li class="list-group-item">'
             page += '<a href="status/{}.xml">Node "{}" nfd-status</a><br>'.format(host.name, host.name)
+            page += '</li>'
 
-        page += '''</body>
+        page += '''
+        </ul>
+        </div>
+        </body>
         </html>'''
 
         with open('/tmp/stats/index.html', 'w') as out:
@@ -309,7 +326,7 @@ class StatisticsCollection:
             # ndnmap client
             host.cmd('nfdstat_c -p /ndn/edu/{}/ndnmap/stats -d 1 &'.format(host.name))
 
-        time.sleep(1)
+        time.sleep(0.25)
 
         # Fetch nfd-status from each node in the network
         for pair in connectedIps:
