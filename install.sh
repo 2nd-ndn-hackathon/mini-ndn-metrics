@@ -216,6 +216,7 @@ function minindn {
     sudo cp ndn_utils/topologies/default-topology.conf "$install_dir"
     sudo cp ndn_utils/topologies/minindn.testbed.conf "$install_dir"
     sudo cp -r nfd_status_fetcher/ "$install_dir/status/"
+    sudo cp -r rt-stats-server/ "$install_dir/rt-stats-server/"
     sudo python setup.py install
 }
 

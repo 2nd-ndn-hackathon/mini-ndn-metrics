@@ -267,8 +267,8 @@ class NfdRealtimeDataFetcher:
     @staticmethod
     def startFetch(host):
         # Remove old file
-        outputFile = '/tmp/stats/status/{}-real-time.txt'.format(host.name)
-        Popen(['rm', ''.format(outputFile)])
+        outputFile = '/tmp/stats/status/rt/{}.txt'.format(host.name)
+        Popen(['rm', outputFile])
 
         t = Timer(5, NfdRealtimeDataFetcher.fetchData, [host])
         t.start()
@@ -277,8 +277,8 @@ class NfdRealtimeDataFetcher:
 
     @staticmethod
     def fetchData(host):
-        outputFile = '/tmp/stats/status/{}-real-time.txt'.format(host.name)
-        host.cmd("nfd-status -v | tail -10 | cut -d'=' -f 2 | cut -d' ' -f 1' >> {}".format(outputFile))
+        outputFile = '/tmp/stats/status/rt/{}.txt'.format(host.name)
+        host.cmd("nfd-status -v | tail -10 > {}".format(outputFile))
 
         # Schedule next fetch
         t = Timer(5, NfdRealtimeDataFetcher.fetchData, [host])
@@ -302,7 +302,9 @@ class StatisticsCollection:
         # Create directory for web server
         Popen(['mkdir', '-p', '/tmp/stats'])
         Popen(['cp', '-r', '/usr/local/etc/mini-ndn/status/', '/tmp/stats/'])
+        Popen(['cp', '-r', '/usr/local/etc/mini-ndn/rt-stats-server/', '/tmp/stats/'])
         Popen(['mkdir', '-p', '/tmp/stats/status/nlsr/'])
+        Popen(['mkdir', '-p', '/tmp/stats/status/rt/'])
 
         # Erase previous links file
         open('/tmp/stats/links.txt', 'w').close()
@@ -398,7 +400,7 @@ class StatisticsCollection:
             NlsrStatusFetcher.startFetch(host)
 
             # NFD realtime data collector
-            #NfdRealtimeDataFetcher.startFetch(host)
+            NfdRealtimeDataFetcher.startFetch(host)
 
         time.sleep(0.25)
 
@@ -410,9 +412,12 @@ class StatisticsCollection:
             StatisticsCollection.node.cmd('nfdc register /ndn/edu/{} udp://{} &'.format(hostName, address))
             StatisticsCollection.node.cmd('./status/nfd-status-fetcher.py -u {}:8080 -o /tmp/stats/status/{}.xml -t 5 &'.format(address, hostName))
 
+        # Run real-time stats JSON API
+        devnull = open(os.devnull, 'wb')
+        Popen(['/usr/local/etc/mini-ndn/rt-stats-server/rt-server.py',], stdout=devnull, stderr=devnull)
+
     @staticmethod
     def runNdnMapServer():
-        print 'nfdstat_s -f links.txt -n {} &'.format(NlsrConfigGenerator.totalLinks)
         StatisticsCollection.node.cmd('nfdstat_s -f links.txt -n {} &> /dev/null &'.format(NlsrConfigGenerator.totalLinks))
 
     @staticmethod
