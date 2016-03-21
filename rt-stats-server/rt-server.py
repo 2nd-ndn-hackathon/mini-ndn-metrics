@@ -2,6 +2,7 @@
 
 import os
 import json
+import bottle
 from bottle import *
 
 class RtStats:
@@ -29,7 +30,20 @@ class RtStats:
 
 @get('/rt.html')
 def server_static():
-    return static_file('rt.html', root='/tmp/stats/')
+    node = None
+
+    try:
+        node = request.query.node
+    except:
+        pass
+
+    with open('/tmp/server.log', 'a') as log:
+        log.write('\'{}\'\n'.format(node))
+
+    if node != '':
+        return template('node_template', node=node)
+    else:
+        return static_file('rt.html', root='/tmp/stats/')
 
 @get('/stats/<node>.json')
 def getNodeJson(node):
@@ -62,4 +76,5 @@ def serve_json():
 
     return json.dumps(statsJson)
 
+bottle.TEMPLATE_PATH.insert(0, '/tmp/stats/rt-stats-server/')
 run(host='127.0.0.1', port=8081)

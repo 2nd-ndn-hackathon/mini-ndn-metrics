@@ -341,6 +341,7 @@ class StatisticsCollection:
           <th>Node Name</th>
           <th>NFD Status</th>
           <th>NLSR Status</th>
+          <th>Real-time Statistics</th>
         </tr>
         '''
 
@@ -352,11 +353,11 @@ class StatisticsCollection:
             page += '<td>{}</td>'.format(host.name)
             page += '<td><a href="status/{}.xml">Status</a></td>'.format(host.name)
             page += '<td><a href="status/nlsr/{}.txt">Status</a></td>'.format(host.name)
+            page += '<td><a target="_blank" href="http://127.0.0.1:8081/rt.html?node={}">Statistics</a></td>'.format(host.name)
             page += '</tr>'
 
         page += '''
         </table>
-        <a href="http://127.0.0.1:8081/rt.html">Real-time Node Statistics</a>
         </div>
         </body>
         </html>'''
@@ -416,7 +417,7 @@ class StatisticsCollection:
             StatisticsCollection.node.cmd('./status/nfd-status-fetcher.py -u {}:8080 -o /tmp/stats/status/{}.xml -t 5 &'.format(address, hostName))
 
         # Run real-time stats JSON API
-        devnull = open(os.devnull, 'wb')
+        devnull = open('/tmp/server.log', 'wb')
         StatisticsCollection.rt_server = Popen(['/usr/local/etc/mini-ndn/rt-stats-server/rt-server.py',], stdout=devnull, stderr=devnull)
 
     @staticmethod
