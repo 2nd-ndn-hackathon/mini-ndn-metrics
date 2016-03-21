@@ -262,7 +262,7 @@ class StatisticsCollection:
         # Create HTML page
         page = '''<html>
         <head>
-        <title>Mini-NDN</title>
+        <title>Mini-NDN Metrics</title>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -273,20 +273,25 @@ class StatisticsCollection:
         </head>
         <body>
         <div class="container">
-        <h1>Mini-NDN</h1>
-        <ul class="list-group">
+        <h1>Mini-NDN Real-time Metric Collection and Visualization</h1>
+        <table class="table table-hover">
+        <tr>
+          <th>Node Name</th>
+          <th>NFD Status</th>
+        </tr>
         '''
 
         for host in net.hosts:
             if host.name == StatisticsCollection.NODE_NAME:
                 continue
 
-            page += '<li class="list-group-item">'
-            page += '<a href="status/{}.xml">Node "{}" nfd-status</a><br>'.format(host.name, host.name)
-            page += '</li>'
+            page += '<tr>'
+            page += '<td>{}</td>'.format(host.name)
+            page += '<td><a href="status/{}.xml">Status</a></td>'.format(host.name)
+            page += '</tr>'
 
         page += '''
-        </ul>
+        </table>
         </div>
         </body>
         </html>'''
