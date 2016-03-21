@@ -296,6 +296,7 @@ class StatisticsCollection:
     NODE_NAME = 'stats'
     node = None
     server = None
+    rt_server = None
 
     @staticmethod
     def setup(net):
@@ -305,6 +306,7 @@ class StatisticsCollection:
         Popen(['cp', '-r', '/usr/local/etc/mini-ndn/rt-stats-server/', '/tmp/stats/'])
         Popen(['mkdir', '-p', '/tmp/stats/status/nlsr/'])
         Popen(['mkdir', '-p', '/tmp/stats/status/rt/'])
+        Popen(['cp', '/usr/local/etc/mini-ndn/rt-stats-server/rt.html', '/tmp/stats/rt.html'])
 
         # Erase previous links file
         open('/tmp/stats/links.txt', 'w').close()
@@ -354,6 +356,7 @@ class StatisticsCollection:
 
         page += '''
         </table>
+        <a href="http://127.0.0.1:8081/rt.html">Real-time Node Statistics</a>
         </div>
         </body>
         </html>'''
@@ -414,7 +417,7 @@ class StatisticsCollection:
 
         # Run real-time stats JSON API
         devnull = open(os.devnull, 'wb')
-        Popen(['/usr/local/etc/mini-ndn/rt-stats-server/rt-server.py',], stdout=devnull, stderr=devnull)
+        StatisticsCollection.rt_server = Popen(['/usr/local/etc/mini-ndn/rt-stats-server/rt-server.py',], stdout=devnull, stderr=devnull)
 
     @staticmethod
     def runNdnMapServer():
@@ -428,6 +431,7 @@ class StatisticsCollection:
     @staticmethod
     def cleanUp():
         StatisticsCollection.server.kill()
+        StatisticsCollection.rt_server.kill()
         NlsrStatusFetcher.cleanUp()
         NfdRealtimeDataFetcher.cleanUp()
 

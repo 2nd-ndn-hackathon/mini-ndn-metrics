@@ -3,7 +3,6 @@
 import os
 import json
 from bottle import *
-from bottle import PasteServer
 
 class RtStats:
     def __init__(self, name):
@@ -28,7 +27,11 @@ class RtStats:
 
         self.stats[key] = value
 
-@get('/')
+@get('/rt.html')
+def server_static():
+    return static_file('rt.html', root='/tmp/stats/')
+
+@get('/stats.json')
 def serve_json():
     statsDir = '/tmp/stats/status/rt/'
     statsJson = []
@@ -46,4 +49,4 @@ def serve_json():
 
     return json.dumps(statsJson)
 
-run(host='127.0.0.1', port=9000, server=PasteServer)
+run(host='127.0.0.1', port=8081)
