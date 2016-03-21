@@ -130,14 +130,14 @@ function reconnect() {
 	
 	var options = {
         chart: {
-          title: 'Population of Largest U.S. Cities'
+          title: 'Real-time traffic'
         },
         hAxis: {
-          title: 'Total Population',
+          title: 'Number of interests',
           minValue: 0,
         },
         vAxis: {
-          title: 'City'
+          title: 'Faces'
         },
         bars: 'horizontal'
       };
@@ -162,11 +162,8 @@ google.charts.setOnLoadCallback(drawMaterial);
 
 </head>
 <body onload="init()">
-<h3>NFD stat real time</h3>
   
-  <div id="chart_div"></div>
-
-<button onclick="reconnect()">Reconnect</button>
+<div id="chart_div"></div>
 
 </body>
 </html>
