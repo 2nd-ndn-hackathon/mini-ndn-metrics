@@ -387,7 +387,7 @@ main(int argc, char* argv[])
     else
     {
       if(DEBUG)
-        std::cout << linkPrefix << ": " << linePair.linkId << ", " << linePair.linkIp << std::endl;
+        std::cout << linkPrefix << ": " << linePair.linkId << ", " << linePair.linkIp << ", " <<  endPrefix << std::endl;
 
       std::unordered_map<std::string,std::list<ndn::NdnMapServer::linkPair>>::const_iterator got = ndnmapServer.m_linksList.find(linkPrefix);
       

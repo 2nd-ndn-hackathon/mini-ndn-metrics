@@ -33,8 +33,9 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 				links = line.split(' ')
 				if len(links) == 4 :
 					linkId = links[0]
-					name = links[1] + " " + links[3]
-					msg += 'name:' + linkId + ':' + name.rstrip() + ';'
+					name = links[1] + "->" + links[3]
+					if "stat" not in name :
+						msg += 'name:' + linkId + ':' + name.rstrip() + ';'
 			f.close()
 			print(msg)
 			self.write_message(msg)
