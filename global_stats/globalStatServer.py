@@ -37,7 +37,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 					if "stat" not in name :
 						msg += 'name:' + linkId + ':' + name.rstrip() + ';'
 			f.close()
-			print(msg)
+			#print(msg)
 			self.write_message(msg)
 
 
@@ -64,7 +64,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 
 					msg += 'id:' + linkId + ':' + bytesOut + ':' + bytesIn.rstrip() + ';'
 			f.close()
-			print(msg)
+			#print(msg)
 			self.write_message(msg)
 
 	def on_message(self, message):

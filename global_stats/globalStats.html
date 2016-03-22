@@ -12,19 +12,19 @@ var host = "ws://127.0.0.1:"+port; // No need to change this if using localhost
 
 //Declare Variables
 var socket;
-var names = []; 
-var linkId = []; 
-var bytesIn = []; 
-var bytesOut = []; 
+var names = [];
+var linkId = [];
+var bytesIn = [];
+var bytesOut = [];
 
 function init() {
 	try {
 		socket = new WebSocket(host);
 		console.log('WebSocket status '+socket.readyState);
-		socket.onopen    = function(msg) { 
-							   console.log("Welcome - status "+this.readyState); 
+		socket.onopen    = function(msg) {
+							   console.log("Welcome - status "+this.readyState);
 						   };
-		socket.onmessage = function(msg) { 
+		socket.onmessage = function(msg) {
 
 							   console.log("Message Received: "+msg.data);
 							   if (msg.data.startsWith("name:")) {
@@ -37,14 +37,14 @@ function init() {
 										names[newVal[1]] = (newVal[2])
 									}
 									else
-										console.log("Data Name error, length: " + newVal.length); 
+										console.log("Data Name error, length: " + newVal.length);
 								}
 								drawMaterial();
                                }
 							   else {
 								explodedValues = msg.data.split(';');
 								//console.log("Separate Values: "+explodedValues);
-								
+
 								//convert strings to numbers
 								for(var i=0; i<explodedValues.length; i++) {
 									newVal = explodedValues[i].split(':');
@@ -53,28 +53,28 @@ function init() {
 											bytesIn[newVal[1]] = 0
 											bytesOut[newVal[1]] = 0
 										}
-										
+
 										bytesIn[newVal[1]] += parseInt(newVal[2])
 										bytesOut[newVal[1]] += parseInt(newVal[3])
 									}
 									else
-										console.log("Data error, length: " + newVal.length); 
-									
-								} 
-								
+										console.log("Data error, length: " + newVal.length);
+
+								}
+
 								drawMaterial();
 								}
-							   
-							
+
+
 						   };
-		socket.onclose   = function(msg) { 
-							   console.log("Disconnected - status "+this.readyState); 
+		socket.onclose   = function(msg) {
+							   console.log("Disconnected - status "+this.readyState);
 						   };
 	}
-	catch(ex){ 
-		console.log(ex); 
+	catch(ex){
+		console.log(ex);
 	}
-	
+
 }
 
 function quit(){
@@ -97,7 +97,7 @@ function reconnect() {
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
 <script type="text/javascript">
-	
+
 	function drawMaterial() {
 		var data = new google.visualization.DataTable();
 		data.addColumn('string', 'Node');
@@ -107,10 +107,10 @@ function reconnect() {
 			if (id in names && id in bytesIn) {
                 data.addRow([names[id], parseInt(bytesIn[id]), parseInt(bytesOut[id])]);//code
             }
-			
+
 		}
-		
-    
+
+
     // use a DataView to 0-out all the values in the data set for the initial draw
     var view = new google.visualization.DataView(data);
     view.setColumns([0, {
@@ -118,22 +118,22 @@ function reconnect() {
         label: data.getColumnLabel(1),
         calc: function () {return 0;}
     }]);
-	
+
 	view.setColumns([1, {
         type: 'number',
         label: data.getColumnLabel(2),
         calc: function () {return 0;}
     }]);
-	
+
 	var material = new google.charts.Bar(document.getElementById('chart_div'));
-    
-	
+
+
 	var options = {
         chart: {
-          title: 'Real-time traffic'
+          title: 'Real-time Traffic'
         },
         hAxis: {
-          title: 'Number of interests',
+          title: 'Number of Interests',
           minValue: 0,
         },
         vAxis: {
@@ -141,14 +141,14 @@ function reconnect() {
         },
         bars: 'horizontal'
       };
-    
+
     var runOnce = google.visualization.events.addListener(material, 'ready', function () {
         google.visualization.events.removeListener(runOnce);
         material.draw(data, options);
     });
-    
+
     material.draw(view, options);
-    
+
     // you can handle the resizing here - no need to recreate your data and charts from scratch
     $(window).resize(function() {
         material.draw(data, options);
@@ -162,8 +162,8 @@ google.charts.setOnLoadCallback(drawMaterial);
 
 </head>
 <body onload="init()">
-  
-<div id="chart_div"></div>
+
+  <div id="chart_div"></div>
 
 </body>
 </html>
